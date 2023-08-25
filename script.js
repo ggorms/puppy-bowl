@@ -1,6 +1,6 @@
 // Use the API_URL variable to make fetch requests to the API.
 // Replace the placeholder with your cohort name (ex: 2109-UNF-HY-WEB-PT)
-const cohortName = "YOUR COHORT NAME HERE";
+const cohortName = "2307-FSA-ET-WEB-FT-SF";
 const API_URL = `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}`;
 
 /**
@@ -10,7 +10,11 @@ const API_URL = `https://fsa-puppy-bowl.herokuapp.com/api/${cohortName}`;
 const fetchAllPlayers = async () => {
   try {
     // TODO
-  } catch (err) {
+    const response = await fetch(API_URL + "/players");
+    const data = await response.json();
+    return data.data.players
+  } 
+  catch (err) {
     console.error("Uh oh, trouble fetching players!", err);
   }
 };
@@ -23,10 +27,15 @@ const fetchAllPlayers = async () => {
 const fetchSinglePlayer = async (playerId) => {
   try {
     // TODO
-  } catch (err) {
+    const response = await fetch(API_URL + "/players/" + playerId);
+    const data = await response.json()
+    return data.data.player
+  } 
+  catch (err) {
     console.error(`Oh no, trouble fetching player #${playerId}!`, err);
   }
 };
+
 
 /**
  * Updates `<main>` to display a list of all players.
@@ -48,7 +57,49 @@ const fetchSinglePlayer = async (playerId) => {
  * @param {Object[]} playerList - an array of player objects
  */
 const renderAllPlayers = (playerList) => {
-  // TODO
+  const mainContainer = document.querySelector("main");
+  mainContainer.innerHTML = ""
+  playerList.forEach((element) => {
+    const playerContainer = document.createElement("div");
+    //Name
+    const playerName = document.createElement("h2");
+    playerName.innerHTML = element.name
+    playerContainer.appendChild(playerName);
+
+    //ID
+    const playerId = document.createElement("h3");
+    playerId.innerHTML = "ID: " + element.id;
+    playerContainer.appendChild(playerId);
+
+    //Image
+    const playerImage = document.createElement("img")
+    playerImage.src = element.imageUrl;
+    playerImage.alt = element.name;
+    playerContainer.appendChild(playerImage)
+
+    // Details Button
+    const detailsButton = document.createElement("button");
+    detailsButton.innerHTML = "DETAILS";
+    playerContainer.appendChild(detailsButton);
+    detailsButton.addEventListener("click", async () => {
+      renderSinglePlayer(await fetchSinglePlayer(element.id))
+    })
+
+    // Delete Button
+    const deleteButton = document.createElement("button");
+    deleteButton.innerHTML = "DELETE";
+    playerContainer.appendChild(deleteButton);
+    deleteButton.addEventListener("click", () => {
+      mainContainer.removeChild(playerContainer)
+    })
+
+    
+
+    mainContainer.appendChild(playerContainer);
+  })
+  
+  
+
 };
 
 /**
@@ -65,7 +116,52 @@ const renderAllPlayers = (playerList) => {
  * @param {Object} player an object representing a single player
  */
 const renderSinglePlayer = (player) => {
-  // TODO
+  const mainContainer = document.querySelector("main");
+  mainContainer.innerHTML = ""
+  const playerContainer = document.createElement("div");
+  
+  // Name
+  const playerName = document.createElement("h2");
+  playerName.innerHTML = player.name;
+  playerContainer.appendChild(playerName);
+
+  // ID
+  const playerId = document.createElement("h3");
+  playerId.innerHTML = "ID: " + player.id;
+  playerContainer.appendChild(playerId);
+
+  // Breed 
+  const playerBreed = document.createElement("h4");
+  playerBreed.innerHTML = player.breed;
+  playerContainer.appendChild(playerBreed);
+
+  // Team Name
+  const teamName = document.createElement("h5");
+  if (player.team){
+    teamName.innerHTML = "Team: " + player.team.name;
+  } else {
+    teamName.innerHTML = "Unassigned"
+  }
+  
+  playerContainer.appendChild(teamName);
+
+  // Image
+  const playerImage = document.createElement("img");
+  playerImage.src = player.imageUrl;
+  playerImage.alt = player.name;
+  playerContainer.appendChild(playerImage);
+
+  // Back to All Players Button
+
+  const allPlayersButton = document.createElement("button");
+  allPlayersButton.innerHTML = "Back To All Players"
+  playerContainer.appendChild(allPlayersButton);
+  allPlayersButton.addEventListener("click", async () => {
+    renderAllPlayers(await fetchAllPlayers())
+  })
+
+
+  mainContainer.appendChild(playerContainer);
 };
 
 /**
